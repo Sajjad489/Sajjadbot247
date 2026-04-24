@@ -1,33 +1,39 @@
 const { Telegraf } = require('telegraf');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const http = require('http'); // লোকাল সার্ভারের জন্য
+const http = require('http');
 
-// কনফিগারেশন
 const botToken = '8594482963:AAHpyR86Appr0xtli024TzoBC1SSGGaEk_o';
 const geminiApiKey = 'AIzaSyDN4C5ywIw357tn8mBCooG_bw-VPQrouiE';
+const allowedChatId = '-1003978676908'; // আপনার দেওয়া চ্যাট আইডি
 
 const bot = new Telegraf(botToken);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-// রেন্ডারের জন্য সিম্পল সার্ভার (যাতে সার্ভিস অফ না হয়)
 http.createServer((req, res) => {
-    res.write('Bot is Running!');
+    res.write('Sajjad AI is Live!');
     res.end();
 }).listen(process.env.PORT || 3000);
 
-bot.start((ctx) => ctx.reply('সাজ্জাদ ভাই, আপনার AI বট এখন প্রস্তুত!'));
+bot.start((ctx) => ctx.reply('সাজ্জাদ ভাই, আমি আপনার AI সহকারী।'));
 
 bot.on('text', async (ctx) => {
+    // চ্যাট আইডি চেক করা হচ্ছে
+    if (ctx.chat.id.toString() !== allowedChatId) {
+        return; // আইডি না মিললে কোনো উত্তর দেবে না
+    }
+
     try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
         const result = await model.generateContent(ctx.message.text);
         const response = await result.response;
         await ctx.reply(response.text());
     } catch (error) {
-        console.error("Error:", error);
-        ctx.reply('কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        console.error("Gemini Error:", error);
+        ctx.reply(`সমস্যা: ${error.message}`);
     }
 });
 
-bot.launch();
-console.log("Bot is alive...");
+bot.launch().then(() => console.log("Bot running on protected chat ID..."));
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
