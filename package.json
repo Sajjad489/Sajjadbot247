@@ -1,0 +1,18 @@
+{
+  "name": "sajjad-ai-bot",
+  "version": "1.0.0",
+  "description": "Telegram AI Bot with Gemini",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "@google/generative-ai": "^0.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Sajjad",
+  "license": "ISC"
+}
